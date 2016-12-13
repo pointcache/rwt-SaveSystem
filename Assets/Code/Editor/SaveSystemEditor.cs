@@ -3,12 +3,34 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public static class SaveSystemEditor
 {
+    private const string LEVELS_MENU = "Levels/";
 
     private const string SaveSystem_MENU = "Assets/SaveSystem/";
     private const string LEVELDATA_NEW = "New Data";
+
+    [MenuItem(LEVELS_MENU + "ToggleSavedState")]
+    public static void ToggleSavedState()
+    {
+        bool state = EditorPrefs.GetBool("rwt_savesystem_editor_savedstate_" + SceneManager.GetActiveScene());
+
+        if (state)
+            SaveSystem.ConvertSceneTo_LoadedState();
+        else
+            SaveSystem.ConvertSceneTo_SavedState();
+
+        EditorPrefs.SetBool("rwt_savesystem_editor_savedstate" + SceneManager.GetActiveScene(), !state);
+    }
+
+    [MenuItem("test/spawn")]
+    public static void spawn()
+    {
+        GameObject.Instantiate(Resources.Load("levelObjects/Coin"));
+    }
+
 
     [MenuItem(SaveSystem_MENU + LEVELDATA_NEW)]
     public static void CreateLevelData()
@@ -26,8 +48,6 @@ public static class SaveSystemEditor
         SceneData data = makeData(scene);
 
         Debug.Log("Created level data for scene :" + scene.name);
-
-
     }
 
 
@@ -72,7 +92,7 @@ public static class SaveSystemEditor
     }
 
 
-    [MenuItem("Levels/CollectData")]
+    [MenuItem(LEVELS_MENU + "CollectData")]
     public static void CollectLevelsData()
     {
         SceneDataCollector collector;

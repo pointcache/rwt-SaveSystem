@@ -1,0 +1,59 @@
+{
+    "levelsdata": {
+        "test1": [
+            {
+                "position": {
+                    "x": -3.83,
+                    "y": 0.1,
+                    "z": -1.52
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin"
+            },
+            {
+                "position": {
+                    "x": -4.195,
+                    "y": 0.1,
+                    "z": 1.453
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin"
+            },
+            {
+                "position": {
+                    "x": -4.472,
+                    "y": 0.1,
+                    "z": 0.517
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin"
+            },
+            {
+                "position": {
+                    "x": -4.541,
+                    "y": 0.1,
+                    "z": -0.466
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin"
+            }
+        ]
+    },
+    "$type": "SaveData"
+}

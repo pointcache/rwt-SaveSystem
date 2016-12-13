@@ -10,9 +10,12 @@ public class Player : MonoBehaviour
     public float maxspeed = 1f;
     public float maxVelocityChange = 2f;
 
+    public float asd { get; set;}
+
     void OnEnable()
     {
         rb = GetComponentInChildren<Rigidbody>();
+        
     }
 
     void FixedUpdate()

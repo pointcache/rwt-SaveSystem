@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 
-public class SaveSystemHooks : MonoBehaviour {
+public static class SaveSystemHooks {
 
-	
+    public static void OnBuild()
+    {
+
+    }
 }
