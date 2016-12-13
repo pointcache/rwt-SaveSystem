@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 using UnityEditor.Callbacks;
 using FullSerializer;
 using System.IO;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class SaveSystem : MonoBehaviour
 {
@@ -15,11 +18,15 @@ public class SaveSystem : MonoBehaviour
     [Serializable]
     public class Config
     {
-        public bool DevMode;
+
     }
 
     public List<SceneData> levels = new List<SceneData>();
-    public SaveData currentSave = new SaveData();
+
+    public TextAsset save_file;
+
+    [HideInInspector]
+    public SaveData currentSave;
 
     public static Dictionary<string, int> idMapping = new Dictionary<string, int>();
 
@@ -48,8 +55,6 @@ public class SaveSystem : MonoBehaviour
 
     }
 
-
-
     internal static string GetUID()
     {
         throw new NotImplementedException();
@@ -66,7 +71,7 @@ public class SaveSystem : MonoBehaviour
         return levels.FirstOrDefault(x => x.scene == scene.name);
     }
 
-    public static void ConvertSceneTo_SavedState()
+    public static void ToSavedState()
     {
         SaveSystem sys = instance;
 
@@ -75,11 +80,11 @@ public class SaveSystem : MonoBehaviour
         SaveData savedata = sys.currentSave;
 
         string scene = SceneManager.GetActiveScene().name;
-        List<SerializedEntityData> lvdata = null;
+        List<SaveEntity> lvdata = null;
         savedata.levelsdata.TryGetValue(scene, out lvdata);
         if (lvdata == null)
         {
-            lvdata = new List<SerializedEntityData>();
+            lvdata = new List<SaveEntity>();
             savedata.levelsdata.Add(scene, lvdata);
         }
 
@@ -88,24 +93,43 @@ public class SaveSystem : MonoBehaviour
         SaveDataBuildDefault();
     }
 
-    static List<SerializedEntityData> CollectLevelEntitiesData()
+    static List<SaveEntity> CollectLevelEntitiesData()
     {
-        List<SerializedEntityData> list = new List<SerializedEntityData>();
+        List<SaveEntity> list = new List<SaveEntity>();
 
-        SerializedEntityComponent[] entities = GameObject.FindObjectsOfType<SerializedEntityComponent>();
+        SaveEntityMono[] entities = GameObject.FindObjectsOfType<SaveEntityMono>();
         int count = entities.Length;
         for (int i = 0; i < count; i++)
         {
-            SerializedEntityData data = entities[i].GetData();
+            SaveEntity data = entities[i].GetData();
             list.Add(data);
-            //DestroyImmediate(entities[i].gameObject);
+            DestroyImmediate(entities[i].gameObject);
         }
 
         return list;
 
     }
 
-    public static void ConvertSceneTo_LoadedState() { }
+    public static void ToLoadedState()
+    {
+        SaveSystem sys = instance;
+
+        if (sys.save_file == null)
+        {
+            sys.currentSave = load_from_disk(Application.dataPath + DATA_BUILD_PATH);
+            if (sys.currentSave == null)
+            {
+                Debug.LogError("No save file at >" + Application.dataPath + DATA_BUILD_PATH + " was found, place it manually in the slot.");
+                return;
+            }
+        }
+        else
+        {
+            sys.currentSave = load_from_file(sys.save_file);
+        }
+
+        sys.rebuild_scene_from_save(sys.currentSave);
+    }
 
     public static void SaveDataBuildDefault()
     {
@@ -130,38 +154,50 @@ public class SaveSystem : MonoBehaviour
 
     static void save_to_disk(string path, SaveData data)
     {
-        Serialize(data, path, true);
+        SerializationHelper.Serialize(data, path, true);
     }
 
-    static bool Serialize(object obj, string path, bool beautify)
+    static SaveData load_from_disk(string path)
     {
-        fsSerializer _serializer = new fsSerializer();
-        fsData data;
-        _serializer.TrySerialize(obj, out data).AssertSuccessWithoutWarnings();
-        StreamWriter sw = new StreamWriter(path);
-        switch (beautify)
+        return SerializationHelper.Load<SaveData>(path);
+    }
+
+    static SaveData load_from_file(TextAsset asset)
+    {
+        return SerializationHelper.LoadFromString<SaveData>(asset.text);
+    }
+
+    void rebuild_scene_from_save(SaveData data)
+    {
+        string scene = SceneManager.GetActiveScene().name;
+
+        List<SaveEntity> list = null;
+        data.levelsdata.TryGetValue(scene, out list);
+
+        if (list == null)
         {
-            case true:
-                sw.Write(fsJsonPrinter.PrettyJson(data));
-                break;
-            case false:
-                sw.Write(fsJsonPrinter.CompressedJson(data));
-                break;
+            Debug.LogError("No save data for this scene found.");
+            return;
         }
+#if UNITY_EDITOR
+        foreach (var entity in list)
+        {
+            GameObject pref = Resources.Load(entity.prefab) as GameObject;
+            GameObject go = PrefabUtility.InstantiatePrefab(pref) as GameObject;
 
-        sw.Close();
-        return true;
-    }
-    public static object Deserialize(Type type, string serializedState)
-    {
-        fsSerializer _serializer = new fsSerializer();
-        // step 1: parse the JSON data
-        fsData data = fsJsonParser.Parse(serializedState);
+            go.transform.position = entity.position;
+            go.transform.rotation = Quaternion.Euler(entity.rotation);
+        }
+#else
+        foreach (var entity in list)
+        {
+            GameObject pref = Resources.Load(entity.prefab) as GameObject;
+            GameObject go = Instantiate(pref);
 
-        // step 2: deserialize the data
-        object deserialized = null;
-        _serializer.TryDeserialize(data, type, ref deserialized).AssertSuccessWithoutWarnings();
+            go.transform.position = entity.position;
+            go.transform.rotation = Quaternion.Euler(entity.rotation);
+        }
+#endif
 
-        return deserialized;
     }
 }

@@ -12,17 +12,16 @@ public static class SaveSystemEditor
     private const string SaveSystem_MENU = "Assets/SaveSystem/";
     private const string LEVELDATA_NEW = "New Data";
 
-    [MenuItem(LEVELS_MENU + "ToggleSavedState")]
-    public static void ToggleSavedState()
+    [MenuItem(LEVELS_MENU + "SavedState")]
+    public static void SavedState()
     {
-        bool state = EditorPrefs.GetBool("rwt_savesystem_editor_savedstate_" + SceneManager.GetActiveScene());
+        SaveSystem.ToSavedState();
+    }
 
-        if (state)
-            SaveSystem.ConvertSceneTo_LoadedState();
-        else
-            SaveSystem.ConvertSceneTo_SavedState();
-
-        EditorPrefs.SetBool("rwt_savesystem_editor_savedstate" + SceneManager.GetActiveScene(), !state);
+    [MenuItem(LEVELS_MENU + "LoadedState")]
+    public static void LoadedState()
+    {
+        SaveSystem.ToLoadedState();
     }
 
     [MenuItem("test/spawn")]

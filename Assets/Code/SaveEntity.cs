@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [System.Serializable]
-public class SerializedEntityData 
+public class SaveEntity 
 {
     public Vector3 position;
     public Vector3 rotation;

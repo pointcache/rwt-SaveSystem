@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public class SaveData : UnityEngine.Object {
-
-    public Dictionary<string, List<SerializedEntityData>> levelsdata = new Dictionary<string, List<SerializedEntityData>>();
-
+public class SaveData  {
+    
+    public Dictionary<string, List<SaveEntity>> levelsdata = new Dictionary<string, List<SaveEntity>>();
+    
 }

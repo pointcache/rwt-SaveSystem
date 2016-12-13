@@ -10,7 +10,7 @@ public class NotEditableStringAttribute : PropertyAttribute { }
 /// This component should not be added in code on runtime. Only objects that are Instanced and already have it.
 /// Thus: only add in editor to the prefab.
 /// </summary>
-public class SerializedEntityComponent : MonoBehaviour
+public class SaveEntityMono : MonoBehaviour
 {
     [NotEditableString] // Treat this special in the editor.
     public string ID; // A String representing our Guid
@@ -21,9 +21,9 @@ public class SerializedEntityComponent : MonoBehaviour
 
     }
 
-    public SerializedEntityData GetData()
+    public SaveEntity GetData()
     {
-        SerializedEntityData data = new SerializedEntityData();
+        SaveEntity data = new SaveEntity();
         data.prefab = prefab;
         data.position = transform.position;
         data.rotation = transform.rotation.eulerAngles;
