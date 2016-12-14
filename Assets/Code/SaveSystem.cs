@@ -3,15 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
-using UnityEditor.Callbacks;
-using FullSerializer;
-using System.IO;
+
 #if UNITY_EDITOR
+using UnityEditor.SceneManagement;
 using UnityEditor;
 #endif
 
 public class SaveSystem : MonoBehaviour
 {
+
     const string DATA_BUILD_PATH = "/GameData/worldData.json";
 
     public Config config;
@@ -25,11 +25,18 @@ public class SaveSystem : MonoBehaviour
 
     public TextAsset save_file;
 
-    [HideInInspector]
-    public SaveData currentSave;
+    SaveData _currentSave; //always assume its null
+    public SaveData currentSave
+    {
+       get {
+            if (_currentSave == null)
+                GetSaveData();
+            return _currentSave;
+
+        }
+    }
 
     public static Dictionary<string, int> idMapping = new Dictionary<string, int>();
-
 
     #region SINGLETON
     private static SaveSystem _instance;
@@ -45,13 +52,36 @@ public class SaveSystem : MonoBehaviour
 
     void OnEnable()
     {
-
+        SceneManager.sceneLoaded += LevelInitialization;
     }
 
-    [PostProcessScene]
-    public static void OnPostprocessScene()
+    SaveData GetSaveData()
     {
-        //deduct if we already built this level
+        if (save_file == null)
+        {
+            _currentSave = load_from_disk(Application.dataPath + DATA_BUILD_PATH);
+            if (_currentSave == null)
+            {
+                Debug.LogError("No save file at >" + Application.dataPath + DATA_BUILD_PATH + " was found, place it manually in the slot.");
+                return null;
+            }
+        }
+        else
+        {
+            _currentSave = load_from_file(save_file);
+        }
+        return _currentSave;
+    }
+
+    public static void SwitchScene(string scene)
+    {
+        SaveScene();
+        SceneManager.LoadScene(scene);
+    }
+
+    void LevelInitialization(Scene scene, LoadSceneMode mode)
+    {
+        LoadSceneEditor();
 
     }
 
@@ -71,12 +101,10 @@ public class SaveSystem : MonoBehaviour
         return levels.FirstOrDefault(x => x.scene == scene.name);
     }
 
-    public static void ToSavedState()
+    public static void SaveScene()
     {
         SaveSystem sys = instance;
 
-        if (sys.currentSave == null)
-            sys.currentSave = new SaveData();
         SaveData savedata = sys.currentSave;
 
         string scene = SceneManager.GetActiveScene().name;
@@ -90,10 +118,42 @@ public class SaveSystem : MonoBehaviour
 
         lvdata.Clear();
         lvdata.AddRange(CollectLevelEntitiesData());
+    }
+
+    public static void LoadScene()
+    {
+        if (GameObject.FindObjectOfType<SaveEntityMono>())
+        {
+            Debug.LogError("Loading of save data if SaveEntities are present in scene is forbidden as it may duplicate amount of entities.");
+            return;
+        }
+
+        SaveSystem sys = instance;
+        sys.rebuild_scene_from_save(sys.currentSave);
+    }
+
+    public static void SaveSceneEditor()
+    {
+        SaveSystem sys = instance;
+
+        SaveData savedata = sys.currentSave;
+
+        string scene = SceneManager.GetActiveScene().name;
+        List<SaveEntity> lvdata = null;
+        savedata.levelsdata.TryGetValue(scene, out lvdata);
+        if (lvdata == null)
+        {
+            lvdata = new List<SaveEntity>();
+            savedata.levelsdata.Add(scene, lvdata);
+        }
+
+        lvdata.Clear();
+        lvdata.AddRange(CollectLevelEntitiesDataEditor());
         SaveDataBuildDefault();
     }
 
-    static List<SaveEntity> CollectLevelEntitiesData()
+#if UNITY_EDITOR
+    static List<SaveEntity> CollectLevelEntitiesDataEditor()
     {
         List<SaveEntity> list = new List<SaveEntity>();
 
@@ -105,29 +165,35 @@ public class SaveSystem : MonoBehaviour
             list.Add(data);
             DestroyImmediate(entities[i].gameObject);
         }
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
 
         return list;
+    } 
+#endif
 
+    static List<SaveEntity> CollectLevelEntitiesData()
+    {
+        List<SaveEntity> list = new List<SaveEntity>();
+
+        SaveEntityMono[] entities = GameObject.FindObjectsOfType<SaveEntityMono>();
+        int count = entities.Length;
+        for (int i = 0; i < count; i++)
+        {
+            SaveEntity data = entities[i].GetData();
+            list.Add(data);
+        }
+        return list;
     }
 
-    public static void ToLoadedState()
+    public static void LoadSceneEditor()
     {
+        if (GameObject.FindObjectOfType<SaveEntityMono>())
+        {
+            Debug.LogError("Loading of save data if SaveEntities are present in scene is forbidden as it may duplicate amount of entities.");
+            return;
+        }
+
         SaveSystem sys = instance;
-
-        if (sys.save_file == null)
-        {
-            sys.currentSave = load_from_disk(Application.dataPath + DATA_BUILD_PATH);
-            if (sys.currentSave == null)
-            {
-                Debug.LogError("No save file at >" + Application.dataPath + DATA_BUILD_PATH + " was found, place it manually in the slot.");
-                return;
-            }
-        }
-        else
-        {
-            sys.currentSave = load_from_file(sys.save_file);
-        }
-
         sys.rebuild_scene_from_save(sys.currentSave);
     }
 

@@ -4,24 +4,26 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 
 public static class SaveSystemEditor
 {
+
     private const string LEVELS_MENU = "Levels/";
 
     private const string SaveSystem_MENU = "Assets/SaveSystem/";
     private const string LEVELDATA_NEW = "New Data";
 
-    [MenuItem(LEVELS_MENU + "SavedState")]
+    [MenuItem(LEVELS_MENU + "SaveScene")]
     public static void SavedState()
     {
-        SaveSystem.ToSavedState();
+        SaveSystem.SaveSceneEditor();
     }
 
-    [MenuItem(LEVELS_MENU + "LoadedState")]
+    [MenuItem(LEVELS_MENU + "LoadScene")]
     public static void LoadedState()
     {
-        SaveSystem.ToLoadedState();
+        SaveSystem.LoadSceneEditor();
     }
 
     [MenuItem("test/spawn")]
