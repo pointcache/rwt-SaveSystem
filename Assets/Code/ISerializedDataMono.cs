@@ -2,7 +2,10 @@
 using System;
 using System.Collections.Generic;
 
-public interface ISerializedDataComponent  {
+public interface ISerializedDataMono  {
+
 
     ISerializedData get_data();
+    //Use Instead of OnEnable
+    void PostLoad();
 }

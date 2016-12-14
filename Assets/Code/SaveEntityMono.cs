@@ -4,6 +4,7 @@ using UnityEditor;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class NotEditableStringAttribute : PropertyAttribute { }
 /// <summary>
@@ -12,21 +13,37 @@ public class NotEditableStringAttribute : PropertyAttribute { }
 /// </summary>
 public class SaveEntityMono : MonoBehaviour
 {
-    [NotEditableString] // Treat this special in the editor.
-    public string ID; // A String representing our Guid
+    [NotEditableString] 
+    public string ID; 
     [NotEditableString]
     public string prefab;
-    void OnEnable()
+
+    
+    public void PostLoad(SaveEntity entity)
     {
 
     }
 
     public SaveEntity GetData()
     {
-        SaveEntity data = new SaveEntity();
-        data.prefab = prefab;
-        data.position = transform.position;
-        data.rotation = transform.rotation.eulerAngles;
+        SaveEntity entity = new SaveEntity();
+        entity.prefab = prefab;
+        entity.position = transform.position;
+        entity.rotation = transform.rotation.eulerAngles;
+        entity.data = CollectData();
+        return entity;
+        
+    }
+
+    
+    List<ISerializedData> CollectData()
+    {
+        List<ISerializedData> data = new List<ISerializedData>();
+        var interfaces = GetInterfacesInStack<ISerializedDataMono>();
+        foreach (var i in interfaces)
+        {
+            data.Add(i.get_data());
+        }
 
         return data;
     }
@@ -59,8 +76,7 @@ public class SaveEntityMono : MonoBehaviour
                 return;
             }
 
-            path = path.Replace("Assets/Resources/", "");
-            path = path.Replace(".prefab", "");
+            path = path.Replace("Assets/", "").Replace("Resources/", "").Replace(".prefab", "");
             prefab = path;
 
         }
@@ -94,4 +110,38 @@ public class SaveEntityMono : MonoBehaviour
         return PrefabUtility.GetPrefabParent(go) != null;
     }
 #endif
+
+
+    List<T> GetInterfacesInStack<T>() where T : class
+    {
+        if (!typeof(T).IsInterface)
+        {
+            Debug.LogError(typeof(T).ToString() + ": is not an actual interface!");
+            return null;
+        }
+        List<T> list = new List<T>();
+        list.AddRange(GetComponents<Component>().OfType<T>().ToList());
+
+        foreach (Transform t in transform)
+        {
+            getinterfacesInStackRecursive(t.gameObject, list);
+        }
+        return list;
+    }
+
+    static void getinterfacesInStackRecursive<T>(GameObject inObj, List<T> list) where T : class
+    {
+        if (!typeof(T).IsInterface)
+        {
+            Debug.LogError(typeof(T).ToString() + ": is not an actual interface!");
+            return;
+        }
+
+        list.AddRange(inObj.GetComponents<Component>().OfType<T>().ToList());
+
+        foreach (Transform t in inObj.transform)
+        {
+            getinterfacesInStackRecursive(t.gameObject, list);
+        }
+    }
 }
