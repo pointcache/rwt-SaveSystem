@@ -95,7 +95,7 @@ public class SaveEntityMono : MonoBehaviour
                 return;
             }
 
-            path = path.Replace("Assets/", "").Replace("Resources/", "").Replace(".prefab", "");
+            path = path.Remove(0, path.IndexOf("Resources/")).Replace("Resources/", "").Replace(".prefab", "");
             prefab = path;
 
         }

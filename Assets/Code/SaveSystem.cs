@@ -61,6 +61,11 @@ public class SaveSystem : MonoBehaviour
         SceneManager.sceneLoaded += LevelInitialization;
     }
 
+    public void clear_current()
+    {
+        _currentSave = null;
+    }
+
     SaveData GetSaveData()
     {
         if (save_file == null)
@@ -167,7 +172,7 @@ public class SaveSystem : MonoBehaviour
             }
 
             dict.Add(data.ID, data);
-            DestroyImmediate(entities[i].gameObject);
+            //DestroyImmediate(entities[i].gameObject);
         }
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }

@@ -17,10 +17,24 @@ public static class SaveSystemEditor
     [MenuItem(LEVELS_MENU + "SaveScene")]
     public static void SavedState()
     {
+        var ents = GameObject.FindObjectsOfType<SaveEntityMono>();
+        if (ents.Length == 0)
+        {
+            Debug.LogError("No entities to save found, aborting save as it may corrupt the data.");
+            return;
+        }
         SaveSystemLoader.ActivateSaveSystem();
         SaveSystem.SaveSceneEditor();
         SaveSystemLoader.DeActivateSaveSystem();
 
+    }
+
+    [MenuItem(LEVELS_MENU + "ClearCurrent(in case of problems)")]
+    public static void ClearCurrent()
+    {
+        SaveSystemLoader.ActivateSaveSystem();
+        SaveSystem.instance.clear_current();
+        SaveSystemLoader.DeActivateSaveSystem();
     }
 
     [MenuItem(LEVELS_MENU + "LoadScene")]
