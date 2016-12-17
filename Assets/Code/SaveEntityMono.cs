@@ -5,6 +5,7 @@ using UnityEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class NotEditableStringAttribute : PropertyAttribute { }
 /// <summary>
@@ -18,24 +19,50 @@ public class SaveEntityMono : MonoBehaviour
     [NotEditableString]
     public string prefab;
 
-    
-    public void PostLoad(SaveEntity entity)
-    {
 
+    public SaveEntity entity
+    {
+        get;
+        private set;
+    }
+    
+
+
+    public void PostLoad(SaveEntity setEntity)
+    {
+        entity = setEntity;
+        ID = entity.ID;
+        //getDataFromSystem();
     }
 
-    public SaveEntity GetData()
+    public SaveEntity SerializeAndGetData()
     {
-        SaveEntity entity = new SaveEntity();
-        entity.prefab = prefab;
-        entity.position = transform.position;
-        entity.rotation = transform.rotation.eulerAngles;
-        entity.data = CollectData();
-        return entity;
+        SaveEntity newentity = new SaveEntity();
+        newentity.ID = ID;
+        newentity.prefab = prefab;
+        newentity.position = transform.position;
+        newentity.rotation = transform.rotation.eulerAngles;
+        newentity.data = CollectData();
+        return newentity;
+    }
+
+    void getDataFromSystem()
+    {
+        if (entity != null)
+            return;
         
+        SaveData data = SaveSystem.instance.currentSave;
+        Dictionary<string, SaveEntity> dict;
+        data.levelsdata.TryGetValue(SceneManager.GetActiveScene().name, out dict);
+        SaveEntity _entity;
+        dict.TryGetValue(ID, out _entity);
+        entity = _entity;
+
+        ID = entity.ID;
+
     }
 
-    
+   
     List<ISerializedData> CollectData()
     {
         List<ISerializedData> data = new List<ISerializedData>();
@@ -48,15 +75,7 @@ public class SaveEntityMono : MonoBehaviour
         return data;
     }
 
-    public string ConvertToSaved()
-    {
-        if (string.IsNullOrEmpty(ID))
-            ID = Guid.NewGuid().ToString();
-        SaveSystem.Register(ID, GetInstanceID());
-        return ID;
-    }
-
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     /// <summary>
     /// Editor Only
     /// </summary>

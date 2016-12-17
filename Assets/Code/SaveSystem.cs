@@ -11,33 +11,6 @@ using UnityEditor;
 
 public class SaveSystem : MonoBehaviour
 {
-
-    const string DATA_BUILD_PATH = "/GameData/worldData.json";
-
-    public Config config;
-    [Serializable]
-    public class Config
-    {
-
-    }
-
-    public List<SceneData> levels = new List<SceneData>();
-
-    public TextAsset save_file;
-
-    SaveData _currentSave; //always assume its null
-    public SaveData currentSave
-    {
-       get {
-            if (_currentSave == null)
-                GetSaveData();
-            return _currentSave;
-
-        }
-    }
-
-    public static Dictionary<string, int> idMapping = new Dictionary<string, int>();
-
     #region SINGLETON
     private static SaveSystem _instance;
     public static SaveSystem instance
@@ -49,6 +22,39 @@ public class SaveSystem : MonoBehaviour
         }
     }
     #endregion
+
+    const string DATA_BUILD_PATH = "/GameData/worldData.json";
+    public List<SceneData> levels = new List<SceneData>();
+    public TextAsset save_file;
+    SaveData _currentSave = null; //always assume its null
+
+    public SaveData currentSave
+    {
+        get
+        {
+            if (_currentSave == null || _currentSave.levelsdata.Count == 0)
+                GetSaveData();
+            return _currentSave;
+
+        }
+    }
+
+    public static void ClearSceneEditor()
+    {
+        SaveEntityMono[] entities = GameObject.FindObjectsOfType<SaveEntityMono>();
+        int count = entities.Length;
+        for (int i = 0; i < count; i++)
+        {
+             Undo.DestroyObjectImmediate(entities[i].gameObject);
+        }
+    }
+
+    public Config config;
+    [Serializable]
+    public class Config
+    {
+
+    }
 
     void OnEnable()
     {
@@ -81,13 +87,8 @@ public class SaveSystem : MonoBehaviour
 
     void LevelInitialization(Scene scene, LoadSceneMode mode)
     {
-        LoadSceneEditor();
+        LoadScene();
 
-    }
-
-    internal static string GetUID()
-    {
-        throw new NotImplementedException();
     }
 
     public string GetScene(SceneData level)
@@ -108,16 +109,15 @@ public class SaveSystem : MonoBehaviour
         SaveData savedata = sys.currentSave;
 
         string scene = SceneManager.GetActiveScene().name;
-        List<SaveEntity> lvdata = null;
+        Dictionary<string, SaveEntity> lvdata = null;
         savedata.levelsdata.TryGetValue(scene, out lvdata);
         if (lvdata == null)
         {
-            lvdata = new List<SaveEntity>();
+            lvdata = new Dictionary<string, SaveEntity>();
             savedata.levelsdata.Add(scene, lvdata);
         }
 
-        lvdata.Clear();
-        lvdata.AddRange(CollectLevelEntitiesData());
+        CollectLevelEntitiesData(lvdata);
     }
 
     public static void LoadScene()
@@ -139,50 +139,50 @@ public class SaveSystem : MonoBehaviour
         SaveData savedata = sys.currentSave;
 
         string scene = SceneManager.GetActiveScene().name;
-        List<SaveEntity> lvdata = null;
+        Dictionary<string, SaveEntity> lvdata = null;
         savedata.levelsdata.TryGetValue(scene, out lvdata);
         if (lvdata == null)
         {
-            lvdata = new List<SaveEntity>();
+            lvdata = new Dictionary<string, SaveEntity>();
             savedata.levelsdata.Add(scene, lvdata);
         }
 
-        lvdata.Clear();
-        lvdata.AddRange(CollectLevelEntitiesDataEditor());
+
+        CollectLevelEntitiesDataEditor(lvdata);
         SaveDataBuildDefault();
     }
 
 #if UNITY_EDITOR
-    static List<SaveEntity> CollectLevelEntitiesDataEditor()
+    static void CollectLevelEntitiesDataEditor(Dictionary<string, SaveEntity> dict)
     {
-        List<SaveEntity> list = new List<SaveEntity>();
-
+        dict.Clear();
         SaveEntityMono[] entities = GameObject.FindObjectsOfType<SaveEntityMono>();
         int count = entities.Length;
         for (int i = 0; i < count; i++)
         {
-            SaveEntity data = entities[i].GetData();
-            list.Add(data);
+            SaveEntity data = entities[i].SerializeAndGetData();
+            if (String.IsNullOrEmpty(data.ID))
+            {
+                data.ID = get_unique_id(dict);
+            }
+
+            dict.Add(data.ID, data);
             DestroyImmediate(entities[i].gameObject);
         }
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-
-        return list;
-    } 
+    }
 #endif
 
-    static List<SaveEntity> CollectLevelEntitiesData()
+    static void CollectLevelEntitiesData(Dictionary<string, SaveEntity> dict)
     {
-        List<SaveEntity> list = new List<SaveEntity>();
-
+        dict.Clear();
         SaveEntityMono[] entities = GameObject.FindObjectsOfType<SaveEntityMono>();
         int count = entities.Length;
         for (int i = 0; i < count; i++)
         {
-            SaveEntity data = entities[i].GetData();
-            list.Add(data);
+            SaveEntity data = entities[i].SerializeAndGetData();
+            dict.Add(data.ID, data);
         }
-        return list;
     }
 
     public static void LoadSceneEditor()
@@ -202,22 +202,6 @@ public class SaveSystem : MonoBehaviour
         save_to_disk(Application.dataPath + DATA_BUILD_PATH, instance.currentSave);
     }
 
-    public static void Unregister(string id)
-    {
-        idMapping.Remove(id);
-    }
-
-    public static void Register(string id, int value)
-    {
-        if (!idMapping.ContainsKey(id))
-            idMapping.Add(id, value);
-    }
-
-    public static int GetInstanceId(string id)
-    {
-        return idMapping[id];
-    }
-
     static void save_to_disk(string path, SaveData data)
     {
         SerializationHelper.Serialize(data, path, true);
@@ -225,7 +209,9 @@ public class SaveSystem : MonoBehaviour
 
     static SaveData load_from_disk(string path)
     {
-        return SerializationHelper.Load<SaveData>(path);
+        SaveData data = SerializationHelper.Load<SaveData>(path);;
+
+        return data;
     }
 
     static SaveData load_from_file(TextAsset asset)
@@ -237,33 +223,52 @@ public class SaveSystem : MonoBehaviour
     {
         string scene = SceneManager.GetActiveScene().name;
 
-        List<SaveEntity> list = null;
-        data.levelsdata.TryGetValue(scene, out list);
+        Dictionary<string, SaveEntity> dict = null;
+        data.levelsdata.TryGetValue(scene, out dict);
 
-        if (list == null)
+        if (dict == null)
         {
             Debug.LogError("No save data for this scene found.");
             return;
         }
 #if UNITY_EDITOR
-        foreach (var entity in list)
+        foreach (var pair in dict)
         {
+            var entity = pair.Value;
+
             GameObject pref = Resources.Load(entity.prefab) as GameObject;
             GameObject go = PrefabUtility.InstantiatePrefab(pref) as GameObject;
 
             go.transform.position = entity.position;
             go.transform.rotation = Quaternion.Euler(entity.rotation);
+
+            go.GetComponent<SaveEntityMono>().PostLoad(entity);
         }
 #else
-        foreach (var entity in list)
+        foreach (var pair in dict)
         {
+            var entity = pair.Value;
+
             GameObject pref = Resources.Load(entity.prefab) as GameObject;
             GameObject go = Instantiate(pref);
 
             go.transform.position = entity.position;
             go.transform.rotation = Quaternion.Euler(entity.rotation);
+            
+            go.GetComponent<SaveEntityMono>().PostLoad(entity);
         }
 #endif
 
     }
+
+    static string get_unique_id(Dictionary<string, SaveEntity> dict)
+    {
+        Guid guid = Guid.NewGuid();
+        string id = guid.ToString();
+        if (dict.ContainsKey(id))
+            return get_unique_id(dict);
+        else
+            return id;
+    }
+
 }

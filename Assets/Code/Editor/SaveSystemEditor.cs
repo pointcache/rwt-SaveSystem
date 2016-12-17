@@ -17,13 +17,26 @@ public static class SaveSystemEditor
     [MenuItem(LEVELS_MENU + "SaveScene")]
     public static void SavedState()
     {
+        SaveSystemLoader.ActivateSaveSystem();
         SaveSystem.SaveSceneEditor();
+        SaveSystemLoader.DeActivateSaveSystem();
+
     }
 
     [MenuItem(LEVELS_MENU + "LoadScene")]
     public static void LoadedState()
     {
+        SaveSystemLoader.ActivateSaveSystem();
         SaveSystem.LoadSceneEditor();
+        SaveSystemLoader.DeActivateSaveSystem();
+    }
+
+    [MenuItem(LEVELS_MENU + "ClearScene/Clear")]
+    public static void ClearScene()
+    {
+        SaveSystemLoader.ActivateSaveSystem();
+        SaveSystem.ClearSceneEditor();
+        SaveSystemLoader.DeActivateSaveSystem();
     }
 
     [MenuItem("test/spawn")]

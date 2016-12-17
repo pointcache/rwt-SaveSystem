@@ -25,6 +25,14 @@ public class SaveSystemLoader : MonoBehaviour {
     [SerializeField]
     private bool devmode;
 
+    public static void ActivateSaveSystem()
+    {
+        instance.transform.GetChild(0).gameObject.SetActive(true);
+    }
+    public static void DeActivateSaveSystem()
+    {
+        instance.transform.GetChild(0).gameObject.SetActive(false);
+    }
 
     void OnEnable()
     {

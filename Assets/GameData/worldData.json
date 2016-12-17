@@ -1,87 +1,174 @@
 {
     "levelsdata": {
-        "test1": [
-            {
+        "test1": {
+            "07b3a5fe-1cba-434d-b162-13a849cf21d8": {
+                "ID": "07b3a5fe-1cba-434d-b162-13a849cf21d8",
                 "position": {
-                    "x": 2.194015,
-                    "y": 0.09999962,
-                    "z": -2.163017
-                },
-                "rotation": {
-                    "x": 90.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
-                "prefab": "levelObjects/Coin"
-            },
-            {
-                "position": {
-                    "x": 3.117027,
+                    "x": -2.481477,
                     "y": 0.1,
-                    "z": -1.615971
+                    "z": -1.330468
                 },
                 "rotation": {
                     "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "prefab": "levelObjects/Coin"
+                "prefab": "levelObjects/Coin",
+                "data": []
             },
-            {
+            "596f9687-9493-49c7-88e3-5919111eebd8": {
+                "ID": "596f9687-9493-49c7-88e3-5919111eebd8",
                 "position": {
-                    "x": 1.398471,
-                    "y": 0.09999962,
-                    "z": -2.294064
+                    "x": -2.42,
+                    "y": 0.1,
+                    "z": -0.65
                 },
                 "rotation": {
                     "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "prefab": "levelObjects/Coin"
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "03360d96-56fa-4d50-92d1-a1535a2b772a": {
+                "ID": "03360d96-56fa-4d50-92d1-a1535a2b772a",
+                "position": {
+                    "x": -1.725,
+                    "y": 0.1,
+                    "z": -1.077
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "92a2383b-1ce9-4805-a495-169ceaa69ef2": {
+                "ID": "92a2383b-1ce9-4805-a495-169ceaa69ef2",
+                "position": {
+                    "x": -1.6,
+                    "y": 0.1,
+                    "z": -0.411
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "5ac1b216-fb9b-4d81-990e-9618b9f58989": {
+                "ID": "5ac1b216-fb9b-4d81-990e-9618b9f58989",
+                "position": {
+                    "x": -1.839,
+                    "y": 0.1,
+                    "z": -1.707
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "a1ed1ac3-9347-48f6-b0bd-bc9bc5e89997": {
+                "ID": "a1ed1ac3-9347-48f6-b0bd-bc9bc5e89997",
+                "position": {
+                    "x": -2.291,
+                    "y": 0.1,
+                    "z": -2.319
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "b3966e9a-0582-4f50-a8d0-2ad58a2622e8": {
+                "ID": "b3966e9a-0582-4f50-a8d0-2ad58a2622e8",
+                "position": {
+                    "x": -1.852,
+                    "y": 0.1,
+                    "z": -2.518
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
             }
-        ],
-        "test2": [
-            {
+        },
+        "test2": {
+            "38a3b385-1faa-41b7-829d-24e0a64242d9": {
+                "ID": "38a3b385-1faa-41b7-829d-24e0a64242d9",
                 "position": {
-                    "x": 2.284724,
+                    "x": 2.01115,
                     "y": 0.1,
-                    "z": -2.641915
+                    "z": -2.710083
                 },
                 "rotation": {
                     "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "prefab": "levelObjects/Coin"
+                "prefab": "levelObjects/Coin",
+                "data": []
             },
-            {
+            "d5a271f0-642e-4ee7-9f76-85778d4e3428": {
+                "ID": "d5a271f0-642e-4ee7-9f76-85778d4e3428",
                 "position": {
-                    "x": 2.122087,
+                    "x": -2.827313,
+                    "y": 0.1,
+                    "z": -0.7795393
+                },
+                "rotation": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "prefab": "levelObjects/Coin",
+                "data": []
+            },
+            "c4d69409-135e-4781-8cf8-f231002e0c54": {
+                "ID": "c4d69409-135e-4781-8cf8-f231002e0c54",
+                "position": {
+                    "x": 2.290892,
                     "y": 0.09999962,
-                    "z": 2.297849
+                    "z": 0.3780681
                 },
                 "rotation": {
                     "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "prefab": "levelObjects/Coin"
+                "prefab": "levelObjects/Coin",
+                "data": []
             },
-            {
+            "3e9bc467-d1a4-4c93-bc6b-424ce6819dce": {
+                "ID": "3e9bc467-d1a4-4c93-bc6b-424ce6819dce",
                 "position": {
-                    "x": -1.542924,
+                    "x": -0.6206243,
                     "y": 0.1,
-                    "z": -1.39631
+                    "z": -3.116987
                 },
                 "rotation": {
                     "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },
-                "prefab": "levelObjects/Coin"
+                "prefab": "levelObjects/Coin",
+                "data": []
             }
-        ]
+        }
     },
     "$type": "SaveData"
 }
